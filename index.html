@@ -11,49 +11,65 @@
     <!-- ฟอนต์ภาษาไทย -->
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Sarabun', sans-serif; }
+        body { font-family: 'Sarabun', sans-serif; background-color: #0f172a; color: #f8fafc; }
+        /* รองรับ Dark mode สำหรับ input datetime */
+        :root { color-scheme: dark; }
+        /* เอฟเฟกต์เงาสะท้อนกระจก */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 40px 0 rgba(0, 0, 0, 0.6);
+        }
     </style>
 </head>
-<body class="min-h-screen bg-gray-50 p-4 md:p-8">
+<body class="min-h-screen bg-[#0b0f19] p-4 md:p-8 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] relative overflow-x-hidden">
 
-    <div class="max-w-6xl mx-auto space-y-6">
+    <!-- แสงนีออนพื้นหลัง -->
+    <div class="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-purple-600/20 blur-[120px] pointer-events-none"></div>
+    <div class="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-cyan-600/20 blur-[120px] pointer-events-none"></div>
+
+    <div class="max-w-6xl mx-auto space-y-8 relative z-10">
         
         <!-- Header -->
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
-            <div class="bg-blue-100 p-3 rounded-xl text-blue-600">
-                <i class="ph ph-clock text-3xl"></i>
+        <div class="glass-panel p-6 rounded-2xl flex items-center gap-5">
+            <div class="bg-gray-800/80 p-3.5 rounded-xl text-cyan-400 border border-cyan-500/30 shadow-[0_0_15px_rgba(6,182,212,0.4)]">
+                <i class="ph-duotone ph-clock text-4xl"></i>
             </div>
             <div>
-                <h1 class="text-2xl font-bold text-gray-800">ระบบจัดการตารางเช่าสินค้า</h1>
-                <p class="text-gray-500 text-sm">จัดการลูกค้า เวลาเช่า และสถานะการคืนสินค้า</p>
+                <h1 class="text-3xl font-bold text-white tracking-wide drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">ระบบจัดการตารางเช่าสินค้า</h1>
+                <p class="text-cyan-200/70 text-sm mt-1 font-medium">จัดการลูกค้า เวลาเช่า และสถานะการคืนสินค้า</p>
             </div>
         </div>
 
         <!-- Add Form Section -->
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-            <h2 class="text-lg font-semibold mb-4 text-gray-800 flex items-center gap-2">
-                <i class="ph ph-plus-circle text-blue-500 text-xl"></i>
+        <div class="glass-panel p-6 rounded-2xl relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-pink-500 rounded-full mix-blend-screen filter blur-[80px] opacity-10 pointer-events-none"></div>
+            
+            <h2 class="text-xl font-semibold mb-5 text-gray-100 flex items-center gap-2">
+                <i class="ph-fill ph-plus-circle text-purple-400 text-2xl drop-shadow-[0_0_10px_rgba(192,132,252,0.6)]"></i>
                 เพิ่มข้อมูลการเช่าใหม่
             </h2>
-            <form id="rentalForm" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <form id="rentalForm" class="grid grid-cols-1 md:grid-cols-4 gap-5">
                 <div class="md:col-span-1">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">ชื่อลูกค้า</label>
+                    <label class="block text-sm font-medium text-gray-300 mb-1.5">ชื่อลูกค้า</label>
                     <input type="text" id="customerName" required placeholder="กรอกชื่อลูกค้า..."
-                        class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" />
+                        class="w-full p-3 bg-gray-900/80 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition shadow-inner" />
                 </div>
                 <div class="md:col-span-1">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">วัน-เวลาที่เริ่มเช่า</label>
+                    <label class="block text-sm font-medium text-gray-300 mb-1.5">วัน-เวลาที่เริ่มเช่า</label>
                     <input type="datetime-local" id="startTime" required
-                        class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition" />
+                        class="w-full p-3 bg-gray-900/80 border border-gray-700 rounded-xl text-white focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 outline-none transition shadow-inner" />
                 </div>
                 <div class="md:col-span-1">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">วัน-เวลาที่สิ้นสุด</label>
+                    <label class="block text-sm font-medium text-gray-300 mb-1.5">วัน-เวลาที่สิ้นสุด</label>
                     <input type="datetime-local" id="endTime" required
-                        class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition" />
+                        class="w-full p-3 bg-gray-900/80 border border-gray-700 rounded-xl text-white focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 outline-none transition shadow-inner" />
                 </div>
                 <div class="md:col-span-1 flex items-end">
                     <button type="submit"
-                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-lg transition shadow-sm">
+                        class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-[0_0_20px_rgba(147,51,234,0.4)] hover:shadow-[0_0_25px_rgba(147,51,234,0.6)] transform hover:-translate-y-0.5 border border-purple-400/30">
                         เพิ่มรายการ
                     </button>
                 </div>
@@ -61,19 +77,19 @@
         </div>
 
         <!-- Table Section -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="glass-panel rounded-2xl overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="bg-gray-50 border-b border-gray-200">
-                            <th class="p-4 font-semibold text-gray-600 whitespace-nowrap">ชื่อลูกค้า</th>
-                            <th class="p-4 font-semibold text-gray-600 whitespace-nowrap">เริ่มเช่า</th>
-                            <th class="p-4 font-semibold text-gray-600 whitespace-nowrap">สิ้นสุดการเช่า</th>
-                            <th class="p-4 font-semibold text-gray-600 whitespace-nowrap">สถานะ</th>
-                            <th class="p-4 font-semibold text-gray-600 whitespace-nowrap text-center">จัดการ</th>
+                        <tr class="bg-gray-800/50 border-b border-gray-700">
+                            <th class="p-4 font-semibold text-gray-300 whitespace-nowrap">ชื่อลูกค้า</th>
+                            <th class="p-4 font-semibold text-gray-300 whitespace-nowrap">เริ่มเช่า</th>
+                            <th class="p-4 font-semibold text-gray-300 whitespace-nowrap">สิ้นสุดการเช่า</th>
+                            <th class="p-4 font-semibold text-gray-300 whitespace-nowrap">สถานะ</th>
+                            <th class="p-4 font-semibold text-gray-300 whitespace-nowrap text-center">จัดการ</th>
                         </tr>
                     </thead>
-                    <tbody id="tableBody" class="divide-y divide-gray-100">
+                    <tbody id="tableBody" class="divide-y divide-gray-700/50">
                         <!-- ข้อมูลจะถูกสร้างผ่าน JavaScript -->
                     </tbody>
                 </table>
@@ -98,8 +114,7 @@
             storageBucket: "komibot-eef25.firebasestorage.app",
             messagingSenderId: "368826795096",
             appId: "1:368826795096:web:d6c7bca022d03526adf62d"
-        };
-        
+        };        
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getDatabase(app); // ใช้ getDatabase แทน getFirestore
@@ -139,7 +154,7 @@
         // 3. ดึงข้อมูลแบบ Real-time จาก Realtime Database
         function setupRealtimeListener() {
             if (!userId) return;
-            document.getElementById('tableBody').innerHTML = `<tr><td colSpan="5" class="p-8 text-center text-gray-500">กำลังโหลดข้อมูล...</td></tr>`;
+            document.getElementById('tableBody').innerHTML = `<tr><td colSpan="5" class="p-8 text-center text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]">กำลังโหลดข้อมูล...</td></tr>`;
             
             const rentalsRef = ref(db, `artifacts/${appId}/users/${userId}/rentals`);
             
@@ -202,7 +217,7 @@
             const currentTime = new Date();
 
             if (rentals.length === 0) {
-                tableBody.innerHTML = `<tr><td colSpan="5" class="p-8 text-center text-gray-400">ยังไม่มีข้อมูลการเช่า</td></tr>`;
+                tableBody.innerHTML = `<tr><td colSpan="5" class="p-8 text-center text-gray-500">ยังไม่มีข้อมูลการเช่า</td></tr>`;
                 return;
             }
 
@@ -211,39 +226,40 @@
                 const needsAction = isExpired && !rental.isReturned;
                 
                 const rowClassName = needsAction 
-                    ? 'bg-red-50 hover:bg-red-100 transition-colors' 
+                    ? 'bg-rose-900/20 hover:bg-rose-900/30 transition-colors' 
                     : rental.isReturned 
-                        ? 'bg-gray-50 opacity-80 hover:bg-gray-100 transition-colors' 
-                        : 'bg-white hover:bg-gray-50 transition-colors';
+                        ? 'bg-gray-900/40 opacity-60 hover:bg-gray-900/60 transition-colors' 
+                        : 'bg-transparent hover:bg-gray-800/40 transition-colors';
 
                 let statusHtml = '';
                 if (rental.isReturned) {
-                    statusHtml = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 border border-green-200"><i class="ph ph-check-circle"></i> คืนสินค้าแล้ว</span>`;
+                    statusHtml = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.2)]"><i class="ph-fill ph-check-circle"></i> คืนสินค้าแล้ว</span>`;
                 } else if (needsAction) {
-                    statusHtml = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700 border border-red-200 animate-pulse"><i class="ph ph-warning-circle"></i> หมดเวลาเช่า</span>`;
+                    statusHtml = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-500/10 text-rose-400 border border-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.4)] animate-pulse"><i class="ph-fill ph-warning-circle"></i> หมดเวลาเช่า</span>`;
                 } else {
-                    statusHtml = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 border border-blue-200"><i class="ph ph-clock"></i> กำลังเช่าอยู่</span>`;
+                    statusHtml = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-[0_0_10px_rgba(6,182,212,0.2)]"><i class="ph-fill ph-clock"></i> กำลังเช่าอยู่</span>`;
                 }
 
                 const btnClass = rental.isReturned 
-                    ? 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-                    : 'bg-green-500 text-white hover:bg-green-600 shadow-sm';
+                    ? 'bg-gray-800 text-gray-400 hover:bg-gray-700 border border-gray-600 shadow-inner'
+                    : 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.2)] hover:shadow-[0_0_15px_rgba(16,185,129,0.4)]';
                 const btnText = rental.isReturned ? 'ยกเลิกการคืน' : 'รับคืนสินค้า';
-                const timeColorClass = needsAction ? 'text-red-600' : 'text-gray-600';
+                const timeColorClass = needsAction ? 'text-rose-400 drop-shadow-[0_0_5px_rgba(244,63,94,0.5)] font-semibold' : 'text-gray-300';
+                const nameColorClass = rental.isReturned ? 'text-gray-500' : 'text-gray-100 font-medium';
 
                 return `
                     <tr class="${rowClassName}">
-                        <td class="p-4 font-medium text-gray-800 whitespace-nowrap">${rental.customerName}</td>
-                        <td class="p-4 text-sm text-gray-600 whitespace-nowrap">${formatDateTime(rental.startTime)}</td>
-                        <td class="p-4 text-sm font-medium ${timeColorClass} whitespace-nowrap">${formatDateTime(rental.endTime)}</td>
+                        <td class="p-4 ${nameColorClass} whitespace-nowrap">${rental.customerName}</td>
+                        <td class="p-4 text-sm text-gray-400 whitespace-nowrap">${formatDateTime(rental.startTime)}</td>
+                        <td class="p-4 text-sm ${timeColorClass} whitespace-nowrap">${formatDateTime(rental.endTime)}</td>
                         <td class="p-4 whitespace-nowrap">${statusHtml}</td>
                         <td class="p-4">
-                            <div class="flex items-center justify-center gap-2">
-                                <button onclick="toggleStatus('${rental.id}')" class="whitespace-nowrap px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${btnClass}">
+                            <div class="flex items-center justify-center gap-3">
+                                <button onclick="toggleStatus('${rental.id}')" class="whitespace-nowrap px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${btnClass}">
                                     ${btnText}
                                 </button>
-                                <button onclick="deleteRental('${rental.id}')" class="p-1.5 text-red-500 hover:bg-red-100 rounded-lg transition-colors" title="ลบข้อมูล">
-                                    <i class="ph ph-trash text-lg"></i>
+                                <button onclick="deleteRental('${rental.id}')" class="p-2 text-rose-500 hover:bg-rose-500/20 rounded-lg transition-all drop-shadow-[0_0_5px_rgba(244,63,94,0.3)] hover:drop-shadow-[0_0_8px_rgba(244,63,94,0.6)]" title="ลบข้อมูล">
+                                    <i class="ph-fill ph-trash text-xl"></i>
                                 </button>
                             </div>
                         </td>
@@ -266,12 +282,10 @@
                 const btn = this.querySelector('button[type="submit"]');
                 const oldText = btn.innerHTML;
                 btn.innerHTML = 'เวลาสิ้นสุดต้องมากกว่าเวลาเริ่ม!';
-                btn.classList.replace('bg-blue-600', 'bg-red-500');
-                btn.classList.replace('hover:bg-blue-700', 'hover:bg-red-600');
+                btn.className = 'w-full bg-rose-600 hover:bg-rose-500 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-[0_0_20px_rgba(244,63,94,0.6)] border border-rose-400';
                 setTimeout(() => {
                     btn.innerHTML = oldText;
-                    btn.classList.replace('bg-red-500', 'bg-blue-600');
-                    btn.classList.replace('hover:bg-red-600', 'hover:bg-blue-700');
+                    btn.className = 'w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-[0_0_20px_rgba(147,51,234,0.4)] hover:shadow-[0_0_25px_rgba(147,51,234,0.6)] transform hover:-translate-y-0.5 border border-purple-400/30';
                 }, 3000);
                 return;
             }
