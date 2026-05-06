@@ -85,7 +85,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // เปลี่ยนมาใช้ Realtime Database แทน Firestore
+        import { getDatabase, ref, onValue, push, set, update, remove } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
         // 1. ตั้งค่า Firebase
         // (หากเอาไปใช้งานจริงนอกระบบนี้ ให้เปลี่ยน YOUR_API_KEY เป็นของโปรเจกต์คุณเองนะครับ)
@@ -93,6 +94,7 @@
             apiKey: "AIzaSyC-83fbGhA9KmPl3XKQ0Osq9B-b20ZYZmM",
             authDomain: "komibot-eef25.firebaseapp.com",
             projectId: "komibot-eef25",
+            databaseURL: "https://komibot-eef25-default-rtdb.asia-southeast1.firebasedatabase.app/", 
             storageBucket: "komibot-eef25.firebasestorage.app",
             messagingSenderId: "368826795096",
             appId: "1:368826795096:web:d6c7bca022d03526adf62d"
@@ -100,7 +102,7 @@
         
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = getFirestore(app);
+        const db = getDatabase(app); // ใช้ getDatabase แทน getFirestore
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'my-rental-app';
 
         let rentals = [];
@@ -127,23 +129,35 @@
                 setupRealtimeListener();
             } else {
                 userId = null;
-                if (unsubscribe) unsubscribe();
+                if (unsubscribe) {
+                    unsubscribe();
+                    unsubscribe = null;
+                }
             }
         });
 
-        // 3. ดึงข้อมูลแบบ Real-time
+        // 3. ดึงข้อมูลแบบ Real-time จาก Realtime Database
         function setupRealtimeListener() {
             if (!userId) return;
             document.getElementById('tableBody').innerHTML = `<tr><td colSpan="5" class="p-8 text-center text-gray-500">กำลังโหลดข้อมูล...</td></tr>`;
             
-            const rentalsRef = collection(db, 'artifacts', appId, 'users', userId, 'rentals');
-            unsubscribe = onSnapshot(rentalsRef, (snapshot) => {
-                rentals = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            const rentalsRef = ref(db, `artifacts/${appId}/users/${userId}/rentals`);
+            
+            // ใช้ onValue ของ Realtime Database ในการจับตาดูการเปลี่ยนแปลง
+            unsubscribe = onValue(rentalsRef, (snapshot) => {
+                const data = snapshot.val();
+                rentals = [];
+                if (data) {
+                    // แปลงข้อมูล Object จาก Firebase ให้เป็น Array
+                    for (const key in data) {
+                        rentals.push({ id: key, ...data[key] });
+                    }
+                }
                 // เรียงข้อมูลจากใหม่ไปเก่า
                 rentals.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
                 renderTable();
             }, (error) => {
-                console.error("Firestore error:", error);
+                console.error("Database error:", error);
             });
         }
 
@@ -163,8 +177,9 @@
             if (!rental) return;
             
             try {
-                const docRef = doc(db, 'artifacts', appId, 'users', userId, 'rentals', id);
-                await updateDoc(docRef, { isReturned: !rental.isReturned });
+                // อัปเดตข้อมูลด้วยคำสั่ง update()
+                const rentalRef = ref(db, `artifacts/${appId}/users/${userId}/rentals/${id}`);
+                await update(rentalRef, { isReturned: !rental.isReturned });
             } catch (error) {
                 console.error("Error updating:", error);
             }
@@ -173,8 +188,9 @@
         window.deleteRental = async function(id) {
             if (!userId) return;
             try {
-                const docRef = doc(db, 'artifacts', appId, 'users', userId, 'rentals', id);
-                await deleteDoc(docRef);
+                // ลบข้อมูลด้วยคำสั่ง remove()
+                const rentalRef = ref(db, `artifacts/${appId}/users/${userId}/rentals/${id}`);
+                await remove(rentalRef);
             } catch (error) {
                 console.error("Error deleting:", error);
             }
@@ -269,8 +285,10 @@
             };
 
             try {
-                const rentalsRef = collection(db, 'artifacts', appId, 'users', userId, 'rentals');
-                await addDoc(rentalsRef, newRental);
+                // เพิ่มข้อมูลใหม่ด้วย push() และ set()
+                const rentalsRef = ref(db, `artifacts/${appId}/users/${userId}/rentals`);
+                const newRentalRef = push(rentalsRef);
+                await set(newRentalRef, newRental);
                 this.reset();
             } catch (error) {
                 console.error("Error adding document: ", error);
