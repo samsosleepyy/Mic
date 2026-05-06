@@ -124,6 +124,38 @@
         let userId = null;
         let unsubscribe = null;
 
+        // --- ตั้งค่า Discord Webhook ---
+        const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1501513760806801518/hk9hUcCJuqikyUDDqOooj-UkozZywj2QtOEmQ86pX-mZ8UDMcxchnTee_FFWDlpylETT";
+
+        async function sendDiscordWebhook(rental, action) {
+            let mention = rental.customerName;
+            // ตรวจสอบว่าเป็นไอดี Discord (ตัวเลขล้วน) หรือไม่ ถ้าใช่ให้แปลงเป็น <@id> เพื่อ Ping
+            if (/^\d+$/.test(mention)) {
+                mention = `<@${mention}>`;
+            } else if (!mention.startsWith('<@')) {
+                mention = `@${mention}`; // ถ้าเป็นชื่อธรรมดา
+            }
+
+            let message = "";
+            if (action === 'start') {
+                message = `🟢 **[เริ่มเช่าสินค้า]**\n👤 ลูกค้า: ${mention}\n🕒 เริ่ม: ${formatDateTime(rental.startTime)}\n⏳ สิ้นสุด: ${formatDateTime(rental.endTime)}`;
+            } else if (action === 'return') {
+                message = `⚪ **[คืนสินค้า / ยกเลิกเช่า]**\n👤 ลูกค้า: ${mention}\n✅ คืนสินค้าเรียบร้อยแล้ว`;
+            } else if (action === 'expire') {
+                message = `🔴 **[หมดเวลาเช่าแล้ว!]**\n👤 ลูกค้า: ${mention}\n⚠️ กรุณาตรวจสอบและทวงถามการคืนสินค้า`;
+            }
+
+            try {
+                await fetch(DISCORD_WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content: message })
+                });
+            } catch (error) {
+                console.error("Webhook Error:", error);
+            }
+        }
+
         // 2. ระบบยืนยันตัวตน
         const initAuth = async () => {
             try {
@@ -194,7 +226,13 @@
             try {
                 // อัปเดตข้อมูลด้วยคำสั่ง update()
                 const rentalRef = ref(db, `artifacts/${appId}/users/${userId}/rentals/${id}`);
-                await update(rentalRef, { isReturned: !rental.isReturned });
+                const isNowReturned = !rental.isReturned;
+                await update(rentalRef, { isReturned: isNowReturned });
+
+                // ส่ง Webhook แจ้งเตือนเมื่อมีการกดคืนสินค้า (เปลี่ยนจากยังไม่คืน -> คืนแล้ว)
+                if (isNowReturned) {
+                    sendDiscordWebhook(rental, 'return');
+                }
             } catch (error) {
                 console.error("Error updating:", error);
             }
@@ -295,6 +333,7 @@
                 startTime,
                 endTime,
                 isReturned: false,
+                notificationSent: false, // เพิ่มสถานะป้องกันการส่ง Webhook แจ้งหมดเวลาซ้ำ
                 createdAt: new Date().toISOString()
             };
 
@@ -303,15 +342,48 @@
                 const rentalsRef = ref(db, `artifacts/${appId}/users/${userId}/rentals`);
                 const newRentalRef = push(rentalsRef);
                 await set(newRentalRef, newRental);
+                
+                // แจ้งเตือนการเริ่มเช่าสินค้า
+                sendDiscordWebhook(newRental, 'start');
+                
                 this.reset();
             } catch (error) {
                 console.error("Error adding document: ", error);
             }
         });
 
+        // ฟังก์ชันตรวจสอบการหมดเวลาเช่า เพื่อส่ง Webhook
+        async function checkExpirations() {
+            if (!userId) return;
+            const currentTime = new Date();
+            
+            for (const rental of rentals) {
+                const isExpired = new Date(rental.endTime) < currentTime;
+                
+                // ถ้าหมดเวลา + ยังไม่คืน + และยังไม่เคยส่งแจ้งเตือน
+                if (isExpired && !rental.isReturned && !rental.notificationSent) {
+                    rental.notificationSent = true; // อัปเดตในเครื่องก่อนเพื่อป้องกันลูปส่งซ้ำ
+                    
+                    // ส่ง Webhook แจ้งเตือน
+                    sendDiscordWebhook(rental, 'expire');
+                    
+                    try {
+                        // บันทึกลงฐานข้อมูลว่าออเดอร์นี้ส่งแจ้งเตือนหมดเวลาไปแล้ว
+                        const rentalRef = ref(db, `artifacts/${appId}/users/${userId}/rentals/${rental.id}`);
+                        await update(rentalRef, { notificationSent: true });
+                    } catch (error) {
+                        console.error("Error updating notification status:", error);
+                    }
+                }
+            }
+        }
+
         // รีเฟรชดูเวลาเรียลไทม์ทุก 1 วินาที
         setInterval(() => {
-            if (rentals.length > 0) renderTable();
+            if (rentals.length > 0) {
+                checkExpirations(); // เพิ่มระบบตรวจเช็คแจ้งเตือน
+                renderTable();
+            }
         }, 1000);
     </script>
 </body>
